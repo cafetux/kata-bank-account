@@ -23,6 +23,8 @@ import static org.mockito.Mockito.when;
 
 public class BankAccountServiceTest {
 
+    public static final LocalDate TODAY = LocalDate.now();
+    public static final LocalDate TWO_DAYS_AGO = LocalDate.now().minusDays(2);
     private Transactions repository = Mockito.mock(Transactions.class);
     private Days clock = Mockito.mock(Days.class);
 
@@ -33,16 +35,24 @@ public class BankAccountServiceTest {
 
     @Test
     public void should_deposit() {
-        when(clock.today()).thenReturn(LocalDate.now());
+        given_a_transaction_today();
         when_deposit_amount(25000);
         then_save_transaction_with_positive_amount();
     }
 
+    private void given_a_transaction_today() {
+        when(clock.today()).thenReturn(LocalDate.now());
+    }
+
     @Test
     public void should_withdraw() {
-        when(clock.today()).thenReturn(LocalDate.now().minusDays(4));
+        given_a_transaction_days_ago();
         when_withdraw(5000);
         then_save_transaction_with_negative_amount();
+    }
+
+    private void given_a_transaction_days_ago() {
+        when(clock.today()).thenReturn(TODAY.minusDays(4));
     }
 
     @Test
@@ -55,13 +65,17 @@ public class BankAccountServiceTest {
     @Test
     public void should_retrieve_balance_for_each_statements() {
 
-        Given_transactions_for_this_account(deposit(20000),withdraw(6000));
+        Given_transactions_for_this_account(deposit(20000, TWO_DAYS_AGO),withdraw(6000, TODAY));
         when_we_retrieve_history();
         assertThat(history.statements()).hasSize(2);
         assertThat(history.statements()).containsExactly(
-                new Statement(LocalDate.now().minusDays(2),Amount.fromCents(20000),Amount.fromCents(20000)),
-                new Statement(LocalDate.now(),Amount.fromCents(-6000),Amount.fromCents(14000))
+                statement(TWO_DAYS_AGO, 20000, 20000),
+                statement(TODAY, -6000, 14000)
                 );
+    }
+
+    private Statement statement(LocalDate localDate, int amount, int balance) {
+        return new Statement(localDate, Amount.fromCents(amount), Amount.fromCents(balance));
     }
 
     private void when_we_retrieve_history() {
@@ -72,15 +86,15 @@ public class BankAccountServiceTest {
         when(repository.all(account(ACCOUNT_NUMBER))).thenReturn(Arrays.stream(ts).collect(Collectors.toList()));
     }
 
-    private Transaction deposit(int cents) {
-        return new Transaction(LocalDate.now().minusDays(2),account(ACCOUNT_NUMBER), Amount.fromCents(cents));
+    private Transaction deposit(int cents, LocalDate date) {
+        return new Transaction(date,account(ACCOUNT_NUMBER), Amount.fromCents(cents));
     }
-    private Transaction withdraw(int i) {
-        return new Transaction(LocalDate.now(),account(ACCOUNT_NUMBER), Amount.fromCents(-i));
+    private Transaction withdraw(int i, LocalDate date) {
+        return new Transaction(date,account(ACCOUNT_NUMBER), Amount.fromCents(-i));
     }
 
     private void Given_one_transaction_for_this_account() {
-        when(repository.all(account(ACCOUNT_NUMBER))).thenReturn(Arrays.asList(deposit(20000)));
+        when(repository.all(account(ACCOUNT_NUMBER))).thenReturn(Arrays.asList(deposit(20000, TODAY.minusDays(2))));
     }
 
 
@@ -93,11 +107,11 @@ public class BankAccountServiceTest {
     }
 
     private void then_save_transaction_with_positive_amount() {
-        verify(repository).save(new Transaction(LocalDate.now(), account("6543223456"), amount(25000)));
+        verify(repository).save(new Transaction(TODAY, account("6543223456"), amount(25000)));
     }
 
     private void then_save_transaction_with_negative_amount() {
-        verify(repository).save(new Transaction(LocalDate.now().minusDays(4), account("6543223456"), amount(-5000)));
+        verify(repository).save(new Transaction(TODAY.minusDays(4), account("6543223456"), amount(-5000)));
     }
 
 
