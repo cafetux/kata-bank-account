@@ -28,6 +28,7 @@ public class BankAccountServiceTest {
 
     private BankAccountService sut = new BankAccountService(repository, clock);
     private History history;
+    private String ACCOUNT_NUMBER = "12365424";
 
 
     @Test
@@ -49,7 +50,6 @@ public class BankAccountServiceTest {
         Given_one_transaction_for_this_account();
         when_we_retrieve_history();
         assertThat(history.statements()).hasSize(1);
-        assertThat(history.statements()).containsExactly(new Statement(LocalDate.now().minusDays(2),Amount.fromCents(20000),Amount.fromCents(20000)));
     }
 
     @Test
@@ -65,22 +65,22 @@ public class BankAccountServiceTest {
     }
 
     private void when_we_retrieve_history() {
-        this.history = sut.history(account("12365424"));
+        this.history = sut.history(account(ACCOUNT_NUMBER));
     }
 
     private void Given_transactions_for_this_account(Transaction... ts) {
-        when(repository.all(account("12365424"))).thenReturn(Arrays.stream(ts).collect(Collectors.toList()));
+        when(repository.all(account(ACCOUNT_NUMBER))).thenReturn(Arrays.stream(ts).collect(Collectors.toList()));
     }
 
     private Transaction deposit(int cents) {
-        return new Transaction(LocalDate.now().minusDays(2),account("12365424"), Amount.fromCents(cents));
+        return new Transaction(LocalDate.now().minusDays(2),account(ACCOUNT_NUMBER), Amount.fromCents(cents));
     }
     private Transaction withdraw(int i) {
-        return new Transaction(LocalDate.now(),account("12365424"), Amount.fromCents(-i));
+        return new Transaction(LocalDate.now(),account(ACCOUNT_NUMBER), Amount.fromCents(-i));
     }
 
     private void Given_one_transaction_for_this_account() {
-        when(repository.all(account("12365424"))).thenReturn(Arrays.asList(deposit(20000)));
+        when(repository.all(account(ACCOUNT_NUMBER))).thenReturn(Arrays.asList(deposit(20000)));
     }
 
 
