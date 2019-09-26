@@ -1,6 +1,6 @@
-package fr.bank.account.infra;
+package fr.bank.account.infra.date;
 
-import fr.bank.account.business.Days;
+import fr.bank.account.business.date.Days;
 
 import java.time.LocalDate;
 

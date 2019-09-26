@@ -2,13 +2,13 @@ package fr.bank.account;
 
 import fr.bank.account.business.AccountNumber;
 import fr.bank.account.business.BankAccountService;
-import fr.bank.account.business.Days;
+import fr.bank.account.business.date.Days;
 import fr.bank.account.business.transaction.Transactions;
 import fr.bank.account.business.statement.Amount;
 import fr.bank.account.business.statement.History;
 import fr.bank.account.business.statement.Statement;
 import fr.bank.account.infra.InMemoryTransactionRepository;
-import fr.bank.account.infra.SystemClock;
+import fr.bank.account.infra.date.SystemClock;
 import org.junit.Test;
 
 import java.time.LocalDate;

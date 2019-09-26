@@ -2,7 +2,7 @@ package fr.bank.account;
 
 import fr.bank.account.business.AccountNumber;
 import fr.bank.account.business.BankAccountService;
-import fr.bank.account.business.Days;
+import fr.bank.account.business.date.Days;
 import fr.bank.account.business.PositiveAmount;
 import fr.bank.account.business.statement.Amount;
 import fr.bank.account.business.statement.History;
